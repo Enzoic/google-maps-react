@@ -54,7 +54,7 @@ export class Marker extends React.Component {
 
     renderMarker() {
         let {
-            map, google, position, mapCenter, icon, label, draggable, title, animation
+            map, google, position, mapCenter, icon, label, draggable, title, animation, zIndex
         } = this.props;
         if (!google) {
             return null
@@ -72,7 +72,8 @@ export class Marker extends React.Component {
             label: label,
             title: title,
             draggable: draggable,
-            animation: animation
+            animation: animation,
+            zIndex: zIndex
         };
         this.marker = new google.maps.Marker(pref);
 
@@ -104,7 +105,8 @@ export class Marker extends React.Component {
 Marker.propTypes = {
     position: PropTypes.object,
     map: PropTypes.object,
-    animation: PropTypes.number
+    animation: PropTypes.number,
+    zIndex: PropTypes.number
 };
 
 evtNames.forEach(e => Marker.propTypes[e] = PropTypes.func);
