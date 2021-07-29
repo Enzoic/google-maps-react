@@ -1,83 +1,90 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import ReactDOM from 'react-dom'
-import {Link} from 'react-router'
-import GitHubForkRibbon from 'react-github-fork-ribbon'
+import React, {Component} from 'react';
 
-let GoogleApiWrapper;
-if (__IS_DEV__) {
-  GoogleApiWrapper = require('../src/index').GoogleApiWrapper
-} else {
-  GoogleApiWrapper = require('../dist').GoogleApiWrapper
-}
+import GitHubForkRibbon from 'react-github-fork-ribbon';
+import PropTypes from 'prop-types';
+import {withRouter, Switch, Link, Redirect, Route} from 'react-router-dom';
 
-import styles from './styles.module.css'
+import styles from './styles.module.css';
 
-export const Container = React.createClass({
+const GoogleApiWrapper = __IS_DEV__
+  ? require('../src/index').GoogleApiWrapper
+  : require('../dist').GoogleApiWrapper;
 
-  propTypes: {
-    children: PropTypes.element.isRequired
-  },
+class Container extends Component {
+  static propTypes = {};
 
-  contextTypes: {
+  static contextTypes = {
     router: PropTypes.object
-  },
+  };
 
-  renderChildren: function() {
-    const {children} = this.props;
-    if (!children) return;
+  render() {
+    const {children, routes, routeDef} = this.props;
 
-    const sharedProps = {
-      google: this.props.google,
-      loaded: this.props.loaded
-    }
-    return React.Children.map(children, c => {
-      return React.cloneElement(c, sharedProps, {
-
-      });
-    })
-  },
-
-  render: function() {
-    const {routeMap, routeDef} = this.props;
-    const {router} = this.context;
-
-    const c = this.renderChildren();
     return (
       <div className={styles.container}>
-        <GitHubForkRibbon href="//github.com/fullstackreact/google-maps-react"
-                  target="_blank"
-                  position="right">
+        <GitHubForkRibbon
+          href="//github.com/fullstackreact/google-maps-react"
+          position="right"
+          target="_blank"
+        >
           Fork me on GitHub
         </GitHubForkRibbon>
+
         <div className={styles.wrapper}>
           <div className={styles.list}>
             <ul>
-              {Object.keys(routeMap).map(key => {
-                return (
-                  <Link to={key}
-                        activeClassName={styles.active}
-                        key={key}>
-                    <li>{routeMap[key].name}</li>
-                  </Link>
-                )
-              })}
+              {routes.map(route => (
+                <Link key={route.path} to={route.path}>
+                  <li>{route.name}</li>
+                </Link>
+              ))}
             </ul>
           </div>
+
           <div className={styles.content}>
             <div className={styles.header}>
               <h1>{routeDef && routeDef.name} Example</h1>
-              <h2><a href="https://github.com/fullstackreact/google-maps-react/blob/master/README.md">Readme</a></h2>
+
+              <h2>
+                <a href="https://github.com/fullstackreact/google-maps-react/blob/master/README.md">
+                  Readme
+                </a>
+              </h2>
             </div>
-            {c}
+
+            <Switch>
+              {routes.map(route => (
+                <Route
+                  key={route.name}
+                  path={route.path}
+                  routeDef={route}
+                  routes={routes}
+                  render={routingProps => (
+                    <div>
+                      <route.component
+                        {...routingProps}
+                        google={this.props.google}
+                        loaded={this.props.loaded}
+                      />
+                    </div>
+                  )}
+                />
+              ))}
+              <Redirect path="*" to={'/basic'} />
+            </Switch>
           </div>
         </div>
       </div>
-    )
+    );
   }
-})
+}
 
-export default GoogleApiWrapper({
-  apiKey: __GAPI_KEY__,
-  libraries: ['places','visualization']
-})(Container)
+const Loading = () => <div>Fancy loading container</div>;
+
+export default withRouter(
+  GoogleApiWrapper({
+    apiKey: __GAPI_KEY__,
+    libraries: ['places', 'visualization'],
+    LoadingContainer: Loading
+  })(Container)
+);

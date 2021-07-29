@@ -1,78 +1,117 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import {Router, hashHistory, Redirect, Route, IndexRoute, Link} from 'react-router'
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-import styles from './global.styles.css';
+import {
+  Redirect,
+  Switch,
+  Link,
+  Route,
+  BrowserRouter as Router
+} from 'react-router-dom';
 
-import Container from './Container'
+import Container from './Container';
 
-const routeMap = {
-  'basic': {
+import Simple from './components/basic';
+import Marker from './components/withMarkers';
+import ClickableMarkers from './components/clickableMarkers';
+import GooglePlaces from './components/places';
+import Autocomplete from './components/autocomplete';
+import HeatMap from './components/withHeatMap';
+import Polygon from './components/withPolygons';
+import Polyline from './components/withPolylines';
+import Rectangle from './components/withRectangle';
+import CustomEvents from './components/resizeEvent';
+
+const routes = [
+  {
+    path: '/basic',
     name: 'Simple',
-    component: require('./components/basic').default
+    component: Simple
   },
-  'markers': {
+  {
+    path: '/markers',
     name: 'Marker',
-    component: require('./components/withMarkers').default
+    component: Marker
   },
-  'clickable_markers': {
+  {
+    path: '/clickable_markers',
     name: 'Clickable markers',
-    component: require('./components/clickableMarkers').default
+    component: ClickableMarkers
   },
-  'places': {
+  {
+    path: '/places',
     name: 'Google places',
-    component: require('./components/places').default
+    component: GooglePlaces
   },
-  'autocomplete': {
+  {
+    path: '/autocomplete',
     name: 'Autocomplete',
-    component: require('./components/autocomplete').default
+    component: Autocomplete
   },
-  'heatMap': {
+  {
+    path: '/heatMap',
     name: 'Heat Map',
-    component: require('./components/withHeatMap').default
+    component: HeatMap
   },
-  'polygons': {
+  {
+    path: '/polygons',
     name: 'Polygon',
-    component: require('./components/withPolygons').default
+    component: Polygon
+  },
+  {
+    path: '/polyline',
+    name: 'Polyline',
+    component: Polyline
+  },
+  {
+    path: '/rectangle',
+    name: 'Rectangle',
+    component: Rectangle
+  },
+  {
+    path: '/onResizeEvent',
+    name: 'Custom events',
+    component: CustomEvents
   }
-}
+];
 
-const createElement = (Component, props) => {
-  const pathname = props.location.pathname.replace('/', '')
-  const routeDef = routeMap[pathname];
+const createElement = (Component, route) => {
+  // const pathname = props.location.pathname.replace('/', '');
+  // const routeDef = routes[pathname];
+
   const newProps = {
-    routeMap, pathname, routeDef
-  }
-  return <Component {...newProps} {...props} />
-}
+    key: route.name,
+    route,
+    routes,
+    // pathname,
+    routeDef: route
+    // routeDef
+  };
 
-const routes = (
-  <Router createElement={createElement}
-          history={hashHistory}>
-    <Route component={Container}
-           path='/'>
-      {Object.keys(routeMap).map(key => {
-        const r = routeMap[key]
-        return (<Route
-                key={key}
-                path={key}
-                name={r.name}
-                component={r.component} />)
-      })}
-      <IndexRoute component={routeMap['basic'].component} />
-    </Route>
+  return <Component {...newProps} />;
+};
+
+const Routing = (
+  <Router>
+    <Container routes={routes} />
   </Router>
-)
+);
 
-const mountNode = document.querySelector('#root')
-if (mountNode) {
-  ReactDOM.render(routes, mountNode);
-} else {
+// <Route render={routeProps => createElement(Container, routeProps)} path="/">
+//     {Object.keys(routes).map(key => {
+//       const r = routes[key];
+//     })}
+//     </Route>
+const mountNode = document.querySelector('#root');
+
+if (mountNode) ReactDOM.render(Routing, mountNode);
+else {
   const hljs = require('highlight.js');
 
   const codes = document.querySelectorAll('pre code');
-  for (let i = 0; i < codes.length; i++) {
-    const block = codes[i]
+
+  for (let i = 0; i < codes.length; i += 1) {
+    const block = codes[i];
     hljs.highlightBlock(block);
   }
 }

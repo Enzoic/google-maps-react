@@ -1,76 +1,69 @@
 (function (global, factory) {
-    if (typeof define === "function" && define.amd) {
-        define(['exports', 'invariant'], factory);
-    } else if (typeof exports !== "undefined") {
-        factory(exports, require('invariant'));
-    } else {
-        var mod = {
-            exports: {}
-        };
-        factory(mod.exports, global.invariant);
-        global.GoogleApi = mod.exports;
-    }
-})(this, function (exports, _invariant) {
-    'use strict';
+  if (typeof define === "function" && define.amd) {
+    define(['exports'], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports);
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports);
+    global.GoogleApi = mod.exports;
+  }
+})(this, function (exports) {
+  'use strict';
 
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    exports.GoogleApi = undefined;
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var GoogleApi = exports.GoogleApi = function GoogleApi(opts) {
+    opts = opts || {};
 
-    var _invariant2 = _interopRequireDefault(_invariant);
-
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
+    if (!opts.hasOwnProperty('apiKey')) {
+      throw new Error('You must pass an apiKey to use GoogleApi');
     }
 
-    var GoogleApi = exports.GoogleApi = function GoogleApi(opts) {
-        opts = opts || {};
+    var apiKey = opts.apiKey;
+    var libraries = opts.libraries || ['places'];
+    var client = opts.client;
+    var URL = opts.url || 'https://maps.googleapis.com/maps/api/js';
 
-        (0, _invariant2.default)(opts.hasOwnProperty('apiKey'), 'You must pass an apiKey to use GoogleApi');
+    var googleVersion = opts.version || '3.31';
 
-        var apiKey = opts.apiKey;
-        var libraries = opts.libraries || ['places'];
-        var client = opts.client;
-        var URL = 'https://maps.googleapis.com/maps/api/js';
+    var script = null;
+    var google = typeof window !== 'undefined' && window.google || null;
+    var loading = false;
+    var channel = null;
+    var language = opts.language;
+    var region = opts.region || null;
 
-        var googleVersion = opts.version || '3';
+    var onLoadEvents = [];
 
-        var script = null;
-        var google = window.google || null;
-        var loading = false;
-        var channel = null;
-        var language = opts.language;
-        var region = null;
+    var url = function url() {
+      var url = URL;
+      var params = {
+        key: apiKey,
+        callback: 'CALLBACK_NAME',
+        libraries: libraries.join(','),
+        client: client,
+        v: googleVersion,
+        channel: channel,
+        language: language,
+        region: region,
+        onerror: 'ERROR_FUNCTION'
+      };
 
-        var onLoadEvents = [];
+      var paramStr = Object.keys(params).filter(function (k) {
+        return !!params[k];
+      }).map(function (k) {
+        return k + '=' + params[k];
+      }).join('&');
 
-        var url = function url() {
-            var url = URL;
-            var params = {
-                key: apiKey,
-                callback: 'CALLBACK_NAME',
-                libraries: libraries.join(','),
-                client: client,
-                v: googleVersion,
-                channel: channel,
-                language: language,
-                region: region
-            };
-
-            var paramStr = Object.keys(params).filter(function (k) {
-                return !!params[k];
-            }).map(function (k) {
-                return k + '=' + params[k];
-            }).join('&');
-
-            return url + '?' + paramStr;
-        };
-
-        return url();
+      return url + '?' + paramStr;
     };
 
-    exports.default = GoogleApi;
+    return url();
+  };
+
+  exports.default = GoogleApi;
 });

@@ -2,27 +2,30 @@ import React from 'react';
 
 import Map from '../../src/index';
 
-import Polygon from '../../src/components/Polygon';
+import Rectangle from '../../src/components/Rectangle';
 
-const WithPolygons = props => {
+
+const WithRectangles = props => {
   if (!props.loaded) return <div>Loading...</div>;
 
-  const polygon = [
-    { lat: 37.789411, lng: -122.422116 },
-    { lat: 37.785757, lng: -122.421333 },
-    { lat: 37.789352, lng: -122.415346 }
-  ];
+  const bounds = {
+    north: 37.789411,
+    south: 37.731757,
+    east: -122.410333,
+    west: -122.489116,
+  };
 
   return (
     <Map
       google={props.google}
       className="map"
       style={{ height: '100%', position: 'relative', width: '100%' }}
-      zoom={14}>
-      <Polygon
+      zoom={11}
+    >
+      <Rectangle
         fillColor="#0000FF"
         fillOpacity={0.35}
-        paths={[polygon]}
+        bounds={bounds}
         strokeColor="#0000FF"
         strokeOpacity={0.8}
         strokeWeight={2}
@@ -31,4 +34,4 @@ const WithPolygons = props => {
   );
 };
 
-export default WithPolygons;
+export default WithRectangles;

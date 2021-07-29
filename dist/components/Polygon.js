@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['exports', 'react', 'prop-types', '../lib/String'], factory);
+    define(['exports', 'react', 'prop-types', '../lib/arePathsEqual', '../lib/String'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(exports, require('react'), require('prop-types'), require('../lib/String'));
+    factory(exports, require('react'), require('prop-types'), require('../lib/arePathsEqual'), require('../lib/String'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, global.react, global.propTypes, global.String);
+    factory(mod.exports, global.react, global.propTypes, global.arePathsEqual, global.String);
     global.Polygon = mod.exports;
   }
-})(this, function (exports, _react, _propTypes, _String) {
+})(this, function (exports, _react, _propTypes, _arePathsEqual, _String) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -26,6 +26,32 @@
     return obj && obj.__esModule ? obj : {
       default: obj
     };
+  }
+
+  var _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  function _objectWithoutProperties(obj, keys) {
+    var target = {};
+
+    for (var i in obj) {
+      if (keys.indexOf(i) >= 0) continue;
+      if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;
+      target[i] = obj[i];
+    }
+
+    return target;
   }
 
   function _classCallCheck(instance, Constructor) {
@@ -109,7 +135,7 @@
     }, {
       key: 'componentDidUpdate',
       value: function componentDidUpdate(prevProps) {
-        if (this.props.map !== prevProps.map) {
+        if (this.props.map !== prevProps.map || !(0, _arePathsEqual.arePathsEqual)(this.props.paths, prevProps.paths)) {
           if (this.polygon) {
             this.polygon.setMap(null);
           }
@@ -136,14 +162,14 @@
             strokeOpacity = _props.strokeOpacity,
             strokeWeight = _props.strokeWeight,
             fillColor = _props.fillColor,
-            fillOpacity = _props.fillOpacity;
-
+            fillOpacity = _props.fillOpacity,
+            props = _objectWithoutProperties(_props, ['map', 'google', 'paths', 'strokeColor', 'strokeOpacity', 'strokeWeight', 'fillColor', 'fillOpacity']);
 
         if (!google) {
           return null;
         }
 
-        var params = {
+        var params = _extends({
           map: map,
           paths: paths,
           strokeColor: strokeColor,
@@ -151,7 +177,7 @@
           strokeWeight: strokeWeight,
           fillColor: fillColor,
           fillOpacity: fillOpacity
-        };
+        }, props);
 
         this.polygon = new google.maps.Polygon(params);
 

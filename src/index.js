@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import {camelize} from './lib/String';
 import {makeCancelable} from './lib/cancelablePromise';
-import invariant from 'invariant';
 
 const mapStyles = {
   container: {
@@ -49,15 +48,16 @@ export {InfoWindow} from './components/InfoWindow';
 export {HeatMap} from './components/HeatMap';
 export {Polygon} from './components/Polygon';
 export {Polyline} from './components/Polyline';
+export {Circle} from './components/Circle';
+export {Rectangle} from './components/Rectangle';
 
 export class Map extends React.Component {
   constructor(props) {
     super(props);
 
-    invariant(
-      props.hasOwnProperty('google'),
-      'You must include a `google` prop.'
-    );
+    if (!props.hasOwnProperty('google')) {
+      throw new Error('You must include a `google` prop');
+    }
 
     this.listeners = {};
     this.state = {
@@ -66,6 +66,8 @@ export class Map extends React.Component {
         lng: this.props.initialCenter.lng
       }
     };
+
+    this.mapRef=React.createRef();
   }
 
   componentDidMount() {
@@ -111,6 +113,9 @@ export class Map extends React.Component {
     if (prevState.currentLocation !== this.state.currentLocation) {
       this.recenterMap();
     }
+    if (this.props.bounds && this.props.bounds !== prevProps.bounds) {
+      this.map.fitBounds(this.props.bounds);
+    }
   }
 
   componentWillUnmount() {
@@ -128,7 +133,7 @@ export class Map extends React.Component {
       const {google} = this.props;
       const maps = google.maps;
 
-      const mapRef = this.refs.map;
+      const mapRef = this.mapRef.current;
       const node = ReactDOM.findDOMNode(mapRef);
       const curr = this.state.currentLocation;
       const center = new maps.LatLng(curr.lat, curr.lng);
@@ -147,14 +152,18 @@ export class Map extends React.Component {
           clickableIcons: !!this.props.clickableIcons,
           disableDefaultUI: this.props.disableDefaultUI,
           zoomControl: this.props.zoomControl,
+          zoomControlOptions: this.props.zoomControlOptions,
           mapTypeControl: this.props.mapTypeControl,
+          mapTypeControlOptions: this.props.mapTypeControlOptions,
           scaleControl: this.props.scaleControl,
           streetViewControl: this.props.streetViewControl,
+          streetViewControlOptions: this.props.streetViewControlOptions,
           panControl: this.props.panControl,
           rotateControl: this.props.rotateControl,
           fullscreenControl: this.props.fullscreenControl,
           scrollwheel: this.props.scrollwheel,
           draggable: this.props.draggable,
+          draggableCursor: this.props.draggableCursor,
           keyboardShortcuts: this.props.keyboardShortcuts,
           disableDoubleClickZoom: this.props.disableDoubleClickZoom,
           noClear: this.props.noClear,
@@ -251,7 +260,7 @@ export class Map extends React.Component {
 
     return (
       <div style={containerStyles} className={this.props.className}>
-        <div style={style} ref="map">
+        <div style={style} ref={this.mapRef}>
           Loading map...
         </div>
         {this.renderChildren()}
@@ -276,19 +285,24 @@ Map.propTypes = {
   clickableIcons: PropTypes.bool,
   disableDefaultUI: PropTypes.bool,
   zoomControl: PropTypes.bool,
+  zoomControlOptions: PropTypes.object,
   mapTypeControl: PropTypes.bool,
+  mapTypeControlOptions: PropTypes.bool,
   scaleControl: PropTypes.bool,
   streetViewControl: PropTypes.bool,
+  streetViewControlOptions: PropTypes.object,
   panControl: PropTypes.bool,
   rotateControl: PropTypes.bool,
   fullscreenControl: PropTypes.bool,
   scrollwheel: PropTypes.bool,
   draggable: PropTypes.bool,
+  draggableCursor: PropTypes.string,
   keyboardShortcuts: PropTypes.bool,
   disableDoubleClickZoom: PropTypes.bool,
   noClear: PropTypes.bool,
   styles: PropTypes.array,
-  gestureHandling: PropTypes.string
+  gestureHandling: PropTypes.string,
+  bounds: PropTypes.object
 };
 
 evtNames.forEach(e => (Map.propTypes[camelize(e)] = PropTypes.func));

@@ -1,22 +1,22 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['exports', './GoogleApiComponent', './components/Marker', './components/InfoWindow', './components/HeatMap', './components/Polygon', './components/Polyline', 'react', 'prop-types', 'react-dom', './lib/String', './lib/cancelablePromise', 'invariant'], factory);
+    define(['exports', './GoogleApiComponent', './components/Marker', './components/InfoWindow', './components/HeatMap', './components/Polygon', './components/Polyline', './components/Circle', './components/Rectangle', 'react', 'prop-types', 'react-dom', './lib/String', './lib/cancelablePromise'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(exports, require('./GoogleApiComponent'), require('./components/Marker'), require('./components/InfoWindow'), require('./components/HeatMap'), require('./components/Polygon'), require('./components/Polyline'), require('react'), require('prop-types'), require('react-dom'), require('./lib/String'), require('./lib/cancelablePromise'), require('invariant'));
+    factory(exports, require('./GoogleApiComponent'), require('./components/Marker'), require('./components/InfoWindow'), require('./components/HeatMap'), require('./components/Polygon'), require('./components/Polyline'), require('./components/Circle'), require('./components/Rectangle'), require('react'), require('prop-types'), require('react-dom'), require('./lib/String'), require('./lib/cancelablePromise'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, global.GoogleApiComponent, global.Marker, global.InfoWindow, global.HeatMap, global.Polygon, global.Polyline, global.react, global.propTypes, global.reactDom, global.String, global.cancelablePromise, global.invariant);
+    factory(mod.exports, global.GoogleApiComponent, global.Marker, global.InfoWindow, global.HeatMap, global.Polygon, global.Polyline, global.Circle, global.Rectangle, global.react, global.propTypes, global.reactDom, global.String, global.cancelablePromise);
     global.index = mod.exports;
   }
-})(this, function (exports, _GoogleApiComponent, _Marker, _InfoWindow, _HeatMap, _Polygon, _Polyline, _react, _propTypes, _reactDom, _String, _cancelablePromise, _invariant) {
+})(this, function (exports, _GoogleApiComponent, _Marker, _InfoWindow, _HeatMap, _Polygon, _Polyline, _Circle, _Rectangle, _react, _propTypes, _reactDom, _String, _cancelablePromise) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.Map = exports.Polyline = exports.Polygon = exports.HeatMap = exports.InfoWindow = exports.Marker = exports.GoogleApiWrapper = undefined;
+  exports.Map = exports.Rectangle = exports.Circle = exports.Polyline = exports.Polygon = exports.HeatMap = exports.InfoWindow = exports.Marker = exports.GoogleApiWrapper = undefined;
   Object.defineProperty(exports, 'GoogleApiWrapper', {
     enumerable: true,
     get: function () {
@@ -53,14 +53,24 @@
       return _Polyline.Polyline;
     }
   });
+  Object.defineProperty(exports, 'Circle', {
+    enumerable: true,
+    get: function () {
+      return _Circle.Circle;
+    }
+  });
+  Object.defineProperty(exports, 'Rectangle', {
+    enumerable: true,
+    get: function () {
+      return _Rectangle.Rectangle;
+    }
+  });
 
   var _react2 = _interopRequireDefault(_react);
 
   var _propTypes2 = _interopRequireDefault(_propTypes);
 
   var _reactDom2 = _interopRequireDefault(_reactDom);
-
-  var _invariant2 = _interopRequireDefault(_invariant);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -141,7 +151,9 @@
 
       var _this = _possibleConstructorReturn(this, (Map.__proto__ || Object.getPrototypeOf(Map)).call(this, props));
 
-      (0, _invariant2.default)(props.hasOwnProperty('google'), 'You must include a `google` prop.');
+      if (!props.hasOwnProperty('google')) {
+        throw new Error('You must include a `google` prop');
+      }
 
       _this.listeners = {};
       _this.state = {
@@ -150,6 +162,8 @@
           lng: _this.props.initialCenter.lng
         }
       };
+
+      _this.mapRef = _react2.default.createRef();
       return _this;
     }
 
@@ -199,6 +213,9 @@
         if (prevState.currentLocation !== this.state.currentLocation) {
           this.recenterMap();
         }
+        if (this.props.bounds && this.props.bounds !== prevProps.bounds) {
+          this.map.fitBounds(this.props.bounds);
+        }
       }
     }, {
       key: 'componentWillUnmount',
@@ -224,7 +241,7 @@
 
           var maps = google.maps;
 
-          var mapRef = this.refs.map;
+          var mapRef = this.mapRef.current;
           var node = _reactDom2.default.findDOMNode(mapRef);
           var curr = this.state.currentLocation;
           var center = new maps.LatLng(curr.lat, curr.lng);
@@ -241,14 +258,18 @@
             clickableIcons: !!this.props.clickableIcons,
             disableDefaultUI: this.props.disableDefaultUI,
             zoomControl: this.props.zoomControl,
+            zoomControlOptions: this.props.zoomControlOptions,
             mapTypeControl: this.props.mapTypeControl,
+            mapTypeControlOptions: this.props.mapTypeControlOptions,
             scaleControl: this.props.scaleControl,
             streetViewControl: this.props.streetViewControl,
+            streetViewControlOptions: this.props.streetViewControlOptions,
             panControl: this.props.panControl,
             rotateControl: this.props.rotateControl,
             fullscreenControl: this.props.fullscreenControl,
             scrollwheel: this.props.scrollwheel,
             draggable: this.props.draggable,
+            draggableCursor: this.props.draggableCursor,
             keyboardShortcuts: this.props.keyboardShortcuts,
             disableDoubleClickZoom: this.props.disableDoubleClickZoom,
             noClear: this.props.noClear,
@@ -355,7 +376,7 @@
           { style: containerStyles, className: this.props.className },
           _react2.default.createElement(
             'div',
-            { style: style, ref: 'map' },
+            { style: style, ref: this.mapRef },
             'Loading map...'
           ),
           this.renderChildren()
@@ -382,19 +403,24 @@
     clickableIcons: _propTypes2.default.bool,
     disableDefaultUI: _propTypes2.default.bool,
     zoomControl: _propTypes2.default.bool,
+    zoomControlOptions: _propTypes2.default.object,
     mapTypeControl: _propTypes2.default.bool,
+    mapTypeControlOptions: _propTypes2.default.bool,
     scaleControl: _propTypes2.default.bool,
     streetViewControl: _propTypes2.default.bool,
+    streetViewControlOptions: _propTypes2.default.object,
     panControl: _propTypes2.default.bool,
     rotateControl: _propTypes2.default.bool,
     fullscreenControl: _propTypes2.default.bool,
     scrollwheel: _propTypes2.default.bool,
     draggable: _propTypes2.default.bool,
+    draggableCursor: _propTypes2.default.string,
     keyboardShortcuts: _propTypes2.default.bool,
     disableDoubleClickZoom: _propTypes2.default.bool,
     noClear: _propTypes2.default.bool,
     styles: _propTypes2.default.array,
-    gestureHandling: _propTypes2.default.string
+    gestureHandling: _propTypes2.default.string,
+    bounds: _propTypes2.default.object
   };
 
   evtNames.forEach(function (e) {

@@ -1,7 +1,8 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import { camelize } from '../lib/String'
+import { arePathsEqual } from '../lib/arePathsEqual';
+import { camelize } from '../lib/String';
 const evtNames = ['click', 'mouseout', 'mouseover'];
 
 const wrappedPromise = function() {
@@ -24,7 +25,10 @@ export class Polygon extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.map !== prevProps.map) {
+    if (
+      this.props.map !== prevProps.map ||
+      !arePathsEqual(this.props.paths, prevProps.paths)
+    ) {
       if (this.polygon) {
         this.polygon.setMap(null);
       }
@@ -47,7 +51,8 @@ export class Polygon extends React.Component {
       strokeOpacity,
       strokeWeight,
       fillColor,
-      fillOpacity
+      fillOpacity,
+      ...props
     } = this.props;
 
     if (!google) {
@@ -61,7 +66,8 @@ export class Polygon extends React.Component {
       strokeOpacity,
       strokeWeight,
       fillColor,
-      fillOpacity
+      fillOpacity,
+      ...props
     };
 
     this.polygon = new google.maps.Polygon(params);

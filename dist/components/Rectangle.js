@@ -1,22 +1,22 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['exports', 'react', 'prop-types', '../lib/String'], factory);
+    define(['exports', 'react', 'prop-types', '../lib/areBoundsEqual', '../lib/String'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(exports, require('react'), require('prop-types'), require('../lib/String'));
+    factory(exports, require('react'), require('prop-types'), require('../lib/areBoundsEqual'), require('../lib/String'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, global.react, global.propTypes, global.String);
-    global.HeatMap = mod.exports;
+    factory(mod.exports, global.react, global.propTypes, global.areBoundsEqual, global.String);
+    global.Rectangle = mod.exports;
   }
-})(this, function (exports, _react, _propTypes, _String) {
+})(this, function (exports, _react, _propTypes, _areBoundsEqual, _String) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.HeatMap = undefined;
+  exports.Rectangle = undefined;
 
   var _react2 = _interopRequireDefault(_react);
 
@@ -102,7 +102,7 @@
     if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
   }
 
-  var evtNames = ['click', 'mouseover', 'recenter'];
+  var evtNames = ['click', 'mouseout', 'mouseover'];
 
   var wrappedPromise = function wrappedPromise() {
     var wrappedPromise = {},
@@ -117,88 +117,80 @@
     return wrappedPromise;
   };
 
-  var HeatMap = exports.HeatMap = function (_React$Component) {
-    _inherits(HeatMap, _React$Component);
+  var Rectangle = exports.Rectangle = function (_React$Component) {
+    _inherits(Rectangle, _React$Component);
 
-    function HeatMap() {
-      _classCallCheck(this, HeatMap);
+    function Rectangle() {
+      _classCallCheck(this, Rectangle);
 
-      return _possibleConstructorReturn(this, (HeatMap.__proto__ || Object.getPrototypeOf(HeatMap)).apply(this, arguments));
+      return _possibleConstructorReturn(this, (Rectangle.__proto__ || Object.getPrototypeOf(Rectangle)).apply(this, arguments));
     }
 
-    _createClass(HeatMap, [{
+    _createClass(Rectangle, [{
       key: 'componentDidMount',
       value: function componentDidMount() {
-        this.heatMapPromise = wrappedPromise();
-        this.renderHeatMap();
+        this.rectanglePromise = wrappedPromise();
+        this.renderRectangle();
       }
     }, {
       key: 'componentDidUpdate',
       value: function componentDidUpdate(prevProps) {
-        if (this.props.map !== prevProps.map || this.props.position !== prevProps.position) {
-          if (this.heatMap) {
-            this.heatMap.setMap(null);
-            this.renderHeatMap();
+        if (this.props.map !== prevProps.map || !(0, _areBoundsEqual.areBoundsEqual)(this.props.bounds, prevProps.bounds)) {
+          if (this.rectangle) {
+            this.rectangle.setMap(null);
           }
+          this.renderRectangle();
         }
       }
     }, {
       key: 'componentWillUnmount',
       value: function componentWillUnmount() {
-        if (this.heatMap) {
-          this.heatMap.setMap(null);
+        if (this.rectangle) {
+          this.rectangle.setMap(null);
         }
       }
     }, {
-      key: 'renderHeatMap',
-      value: function renderHeatMap() {
+      key: 'renderRectangle',
+      value: function renderRectangle() {
         var _this2 = this;
 
         var _props = this.props,
             map = _props.map,
             google = _props.google,
-            positions = _props.positions,
-            mapCenter = _props.mapCenter,
-            icon = _props.icon,
-            gradient = _props.gradient,
-            _props$radius = _props.radius,
-            radius = _props$radius === undefined ? 20 : _props$radius,
-            _props$opacity = _props.opacity,
-            opacity = _props$opacity === undefined ? 0.2 : _props$opacity,
-            props = _objectWithoutProperties(_props, ['map', 'google', 'positions', 'mapCenter', 'icon', 'gradient', 'radius', 'opacity']);
+            bounds = _props.bounds,
+            strokeColor = _props.strokeColor,
+            strokeOpacity = _props.strokeOpacity,
+            strokeWeight = _props.strokeWeight,
+            fillColor = _props.fillColor,
+            fillOpacity = _props.fillOpacity,
+            props = _objectWithoutProperties(_props, ['map', 'google', 'bounds', 'strokeColor', 'strokeOpacity', 'strokeWeight', 'fillColor', 'fillOpacity']);
 
         if (!google) {
           return null;
         }
 
-        var data = positions.map(function (pos) {
-          return { location: new google.maps.LatLng(pos.lat, pos.lng), weight: pos.weight };
-        });
-
-        var pref = _extends({
+        var params = _extends({
           map: map,
-          gradient: gradient,
-          radius: radius,
-          opacity: opacity,
-          data: data
+          bounds: bounds,
+          strokeColor: strokeColor,
+          strokeOpacity: strokeOpacity,
+          strokeWeight: strokeWeight,
+          fillColor: fillColor,
+          fillOpacity: fillOpacity
         }, props);
 
-        this.heatMap = new google.maps.visualization.HeatmapLayer(pref);
-
-        this.heatMap.set('radius', radius === undefined ? 20 : radius);
-
-        this.heatMap.set('opacity', opacity === undefined ? 0.2 : opacity);
+        this.rectangle = new google.maps.Rectangle(params);
 
         evtNames.forEach(function (e) {
-          _this2.heatMap.addListener(e, _this2.handleEvent(e));
+          _this2.rectangle.addListener(e, _this2.handleEvent(e));
         });
 
-        this.heatMapPromise.resolve(this.heatMap);
+        this.rectanglePromise.resolve(this.rectangle);
       }
     }, {
-      key: 'getHeatMap',
-      value: function getHeatMap() {
-        return this.heatMapPromise;
+      key: 'getRectangle',
+      value: function getRectangle() {
+        return this.rectanglePromise;
       }
     }, {
       key: 'handleEvent',
@@ -208,33 +200,37 @@
         return function (e) {
           var evtName = 'on' + (0, _String.camelize)(evt);
           if (_this3.props[evtName]) {
-            _this3.props[evtName](_this3.props, _this3.heatMap, e);
+            _this3.props[evtName](_this3.props, _this3.rectangle, e);
           }
         };
       }
     }, {
       key: 'render',
       value: function render() {
+        console.log('hii, ', this.props.bounds);
         return null;
       }
     }]);
 
-    return HeatMap;
+    return Rectangle;
   }(_react2.default.Component);
 
-  HeatMap.propTypes = {
-    position: _propTypes2.default.object,
-    map: _propTypes2.default.object,
-    icon: _propTypes2.default.string
+  Rectangle.propTypes = {
+    bounds: _propTypes2.default.object,
+    strokeColor: _propTypes2.default.string,
+    strokeOpacity: _propTypes2.default.number,
+    strokeWeight: _propTypes2.default.number,
+    fillColor: _propTypes2.default.string,
+    fillOpacity: _propTypes2.default.number
   };
 
   evtNames.forEach(function (e) {
-    return HeatMap.propTypes[e] = _propTypes2.default.func;
+    return Rectangle.propTypes[e] = _propTypes2.default.func;
   });
 
-  HeatMap.defaultProps = {
-    name: 'HeatMap'
+  Rectangle.defaultProps = {
+    name: 'Rectangle'
   };
 
-  exports.default = HeatMap;
+  exports.default = Rectangle;
 });

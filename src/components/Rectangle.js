@@ -1,14 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { arePathsEqual } from '../lib/arePathsEqual';
+import { areBoundsEqual } from '../lib/areBoundsEqual';
 import { camelize } from '../lib/String';
 const evtNames = ['click', 'mouseout', 'mouseover'];
 
 const wrappedPromise = function() {
     var wrappedPromise = {},
-        promise = new Promise(function
-           (resolve, reject) {
+        promise = new Promise(function (resolve, reject) {
             wrappedPromise.resolve = resolve;
             wrappedPromise.reject = reject;
         });
@@ -19,38 +18,40 @@ const wrappedPromise = function() {
     return wrappedPromise;
 }
 
-export class Polyline extends React.Component {
+export class Rectangle extends React.Component {
   componentDidMount() {
-    this.polylinePromise = wrappedPromise();
-    this.renderPolyline();
+    this.rectanglePromise = wrappedPromise();
+    this.renderRectangle();
   }
 
   componentDidUpdate(prevProps) {
     if (
       this.props.map !== prevProps.map ||
-      !arePathsEqual(this.props.path, prevProps.path)
+      !areBoundsEqual(this.props.bounds, prevProps.bounds)
     ) {
-      if (this.polyline) {
-        this.polyline.setMap(null);
+      if (this.rectangle) {
+        this.rectangle.setMap(null);
       }
-      this.renderPolyline();
+      this.renderRectangle();
     }
   }
 
   componentWillUnmount() {
-    if (this.polyline) {
-      this.polyline.setMap(null);
+    if (this.rectangle) {
+      this.rectangle.setMap(null);
     }
   }
 
-  renderPolyline() {
+  renderRectangle() {
     const {
       map,
       google,
-      path,
+      bounds,
       strokeColor,
       strokeOpacity,
       strokeWeight,
+      fillColor,
+      fillOpacity,
       ...props
     } = this.props;
 
@@ -60,51 +61,56 @@ export class Polyline extends React.Component {
 
     const params = {
       map,
-      path,
+      bounds,
       strokeColor,
       strokeOpacity,
       strokeWeight,
+      fillColor,
+      fillOpacity,
       ...props
     };
 
-    this.polyline = new google.maps.Polyline(params);
+    this.rectangle = new google.maps.Rectangle(params);
 
     evtNames.forEach(e => {
-      this.polyline.addListener(e, this.handleEvent(e));
+      this.rectangle.addListener(e, this.handleEvent(e));
     });
 
-    this.polylinePromise.resolve(this.polyline);
+    this.rectanglePromise.resolve(this.rectangle);
   }
 
-  getPolyline() {
-    return this.polylinePromise;
+  getRectangle() {
+    return this.rectanglePromise;
   }
 
   handleEvent(evt) {
     return (e) => {
       const evtName = `on${camelize(evt)}`
       if (this.props[evtName]) {
-        this.props[evtName](this.props, this.polyline, e);
+        this.props[evtName](this.props, this.rectangle, e);
       }
     }
   }
 
   render() {
+    console.log('hii, ', this.props.bounds);
     return null;
   }
 }
 
-Polyline.propTypes = {
-  path: PropTypes.array,
+Rectangle.propTypes = {
+  bounds: PropTypes.object,
   strokeColor: PropTypes.string,
   strokeOpacity: PropTypes.number,
-  strokeWeight: PropTypes.number
+  strokeWeight: PropTypes.number,
+  fillColor: PropTypes.string,
+  fillOpacity: PropTypes.number
 }
 
-evtNames.forEach(e => Polyline.propTypes[e] = PropTypes.func)
+evtNames.forEach(e => Rectangle.propTypes[e] = PropTypes.func)
 
-Polyline.defaultProps = {
-  name: 'Polyline'
+Rectangle.defaultProps = {
+  name: 'Rectangle'
 }
 
-export default Polyline
+export default Rectangle

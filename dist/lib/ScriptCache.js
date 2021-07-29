@@ -25,25 +25,41 @@
 
             Cache._onLoad = function (key) {
                 return function (cb) {
+                    var registered = true;
+
+                    function unregister() {
+                        registered = false;
+                    }
+
                     var stored = scriptMap.get(key);
+
                     if (stored) {
                         stored.promise.then(function () {
-                            stored.error ? cb(stored.error) : cb(null, stored);
+                            if (registered) {
+                                stored.error ? cb(stored.error) : cb(null, stored);
+                            }
+
                             return stored;
+                        }).catch(function (error) {
+                            return cb(error);
                         });
                     } else {
                         // TODO:
                     }
+
+                    return unregister;
                 };
             };
 
             Cache._scriptTag = function (key, src) {
                 if (!scriptMap.has(key)) {
+                    // Server side rendering environments don't always have access to the `document` global.
+                    // In these cases, we're not going to be able to return a script tag, so just return null.
+                    if (typeof document === 'undefined') return null;
+
                     var tag = document.createElement('script');
                     var promise = new Promise(function (resolve, reject) {
-                        var resolved = false,
-                            errored = false,
-                            body = document.getElementsByTagName('body')[0];
+                        var body = document.getElementsByTagName('body')[0];
 
                         tag.type = 'text/javascript';
                         tag.async = false; // Load in order
@@ -106,7 +122,7 @@
                     };
                     scriptMap.set(key, initialState);
                 }
-                return scriptMap.get(key);
+                return scriptMap.get(key).tag;
             };
 
             // let scriptTags = document.querySelectorAll('script')

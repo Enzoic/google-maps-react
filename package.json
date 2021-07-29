@@ -1,6 +1,6 @@
 {
   "name": "passwordping-google-maps-react",
-  "version": "1.3.0",
+  "version": "2.0.6",
   "description": "Google maps container",
   "author": "PasswordPing <mike@passwordping.com>",
   "license": "MIT",
@@ -12,6 +12,12 @@
     "url": "https://github.com/PasswordPing/passwordping-google-maps-react.git"
   },
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "types": "index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "prepublish": "./scripts/prepublish.sh",
     "preversion": ". ./scripts/prepublish.sh",
@@ -25,8 +31,10 @@
     "test-watch": "npm run testonly -- --watch --watch-extensions js"
   },
   "devDependencies": {
+    "@types/googlemaps": "^3",
+    "@types/react": "^15.0.0",
     "autoprefixer": "^6.3.6",
-    "babel-cli": "^6.7.7",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.7.4",
     "babel-eslint": "^6.0.2",
     "babel-loader": "^6.2.4",
@@ -48,7 +56,9 @@
     "eslint-plugin-babel": "^3.1.0",
     "eslint-plugin-react": "^5.1.1",
     "file-loader": "^0.8.5",
+    "gh-pages": "^1.1.0",
     "highlight.js": "^9.3.0",
+    "history": "^3.0.0",
     "hjs-webpack": "^8.1.0",
     "jsdom": "^9.2.1",
     "marked": "^0.3.17",
@@ -61,19 +71,16 @@
     "react": "^15.0.0",
     "react-addons-test-utils": "^15.0.0",
     "react-dom": "^15.0.0",
-    "react-github-fork-ribbon": "^0.4.3",
-    "react-router": "^2.4.0",
+    "react-github-fork-ribbon": "^0.5.1",
+    "react-router-dom": "^4.2.2",
     "sinon": "^1.17.3",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.0"
   },
   "peerDependencies": {
-    "react": "~0.14.8 || ^15.0.0",
-    "react-dom": "~0.14.8 || ^15.0.0"
+    "react": "~0.14.8 || ^15.0.0 || ^16.0.0",
+    "react-dom": "~0.14.8 || ^15.0.0 || ^16.0.0"
   },
-  "dependencies": {
-    "history": "^3.0.0",
-    "invariant": "^2.2.1"
-  }
+  "dependencies": {}
 }
