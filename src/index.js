@@ -96,25 +96,28 @@ export class Map extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.google !== this.props.google) {
+    if (prevProps.google !== this.props.google || !this.map) {
       this.loadMap();
     }
-    if (this.props.visible !== prevProps.visible) {
-      this.restyleMap();
-    }
-    if (this.props.zoom !== prevProps.zoom) {
-      this.map.setZoom(this.props.zoom);
-    }
-    if (this.props.center !== prevProps.center) {
-      this.setState({
-        currentLocation: this.props.center
-      });
-    }
-    if (prevState.currentLocation !== this.state.currentLocation) {
-      this.recenterMap();
-    }
-    if (this.props.bounds && this.props.bounds !== prevProps.bounds) {
-      this.map.fitBounds(this.props.bounds);
+    if (this.map) {
+      if (this.props.visible !== prevProps.visible) {
+        this.restyleMap();
+      }
+      if (this.props.zoom !== prevProps.zoom) {
+        this.map.setZoom(this.props.zoom);
+      }
+      if (this.props.center !== prevProps.center) {
+        this.setState({
+          currentLocation: this.props.center
+        });
+      }
+      if (prevState.currentLocation !== this.state.currentLocation) {
+        this.recenterMap();
+      }
+      if (this.props.bounds && this.props.bounds !== prevProps.bounds) {
+        this.map.fitBounds(this.props.bounds);
+      }
+  
     }
   }
 
